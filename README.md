@@ -18,3 +18,8 @@ GTD é um método de produtividade criado por David Allen baseado em capturar tu
 ## Status
 🚧 Em desenvolvimento
 
+## Rotas 
+| GET | / | Status da API |
+| POST | /inbox | Cria uma nova tarefa na inbox |
+| GET | /inbox | Retorna todas as tarefas da inbox |
+
