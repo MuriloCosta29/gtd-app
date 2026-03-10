@@ -25,3 +25,19 @@ GTD é um método de produtividade criado por David Allen baseado em capturar tu
 | GET | / | Status da API |
 | POST | /inbox | Cria uma nova tarefa na inbox |
 | GET | /inbox | Retorna todas as tarefas da inbox |
+
+## Roadmap
+
+### Backend
+- [x] Health check endpoint
+- [x] `POST /inbox` — captura tarefas
+- [x] `GET /inbox` — retorna tarefas
+- [ ] Banco de dados SQLite
+- [ ] `DELETE /inbox/{id}` — remover tarefa processada
+- [ ] `PATCH /inbox/{id}` — atualizar status de uma tarefa
+
+### Frontend
+- [ ] Interface
+
+### DevOps
+- [ ] Conteinerização com Docker
