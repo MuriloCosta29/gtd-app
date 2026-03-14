@@ -69,12 +69,23 @@ def return_inbox(db: Session = Depends(get_session)):
 
 @app.delete("/inbox/{id}")
 def delete_task(id: int, db: Session = Depends(get_session)):
-    task = db.query(InboxItemModel).filter(InboxItemModel.id == id).first()
-    if task is None:
+    task_del = db.query(InboxItemModel).filter(InboxItemModel.id == id).first()
+    if task_del is None:
         raise HTTPException(status_code=404, detail="Task not found")
-    db.delete(task)
+    db.delete(task_del)
     db.commit()
-    return {"message": "Task deletada com sucesso", "id": id}
+    return {"message": "Tarefa deletada com sucesso", "id": id}
 
 
 # ------------------------------------------------------------------------------------------------
+
+
+@app.patch("/inbox/{id}")
+def edit_task(id: int, change: InboxItem, db: Session = Depends(get_session)):
+    task = db.query(InboxItemModel).filter(InboxItemModel.id == id).first()
+    if task is None:
+        raise HTTPException(status_code=404, detail="Tarefa não encontrada")
+    task.text = change.text
+    db.commit()
+    db.refresh(task)
+    return task
