@@ -34,7 +34,7 @@ GTD é um método de produtividade criado por David Allen baseado em capturar tu
 - [x] `GET /inbox` — retorna tarefas
 - [x] Banco de dados SQLite
 - [x] `DELETE /inbox/{id}` — remover tarefa processada
-- [ ] `PATCH /inbox/{id}` — atualizar status de uma tarefa
+- [x] `PATCH /inbox/{id}` — atualizar status de uma tarefa
 
 ### Frontend
 - [ ] Interface
