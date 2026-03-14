@@ -6,7 +6,8 @@ from fastapi import (
     FastAPI,
     Depends,
     HTTPException,
-)  # Depends() -> what have inside parantheses, the FastAPI call and say: "before running this route, call what's inside () and inject the result as db(example.)"
+)  # Depends() -> what have inside parentheses, the FastAPI call and say: "before running this route, call what's inside () and inject the result as db(example.)"
+
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -17,8 +18,18 @@ from database import engine
 
 # ------------------------------------------------------------------------------------------------
 
+from fastapi.middleware.cors import CORSMiddleware
+
 Base.metadata.create_all(bind=engine)  # Creates the table in the database file.
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 # ------------------------------------------------------------------------------------------------
 

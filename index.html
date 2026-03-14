@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTD Inbox</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #fcfcfc;
+      --text-color: #1a1a1a;
+      --border-color: #e5e5e5;
+      --primary-color: #000000;
+      --hover-bg: #f3f4f6;
+      --danger-color: #dc2626;
+      --btn-text: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    /* Form Styles */
+    .task-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      font-size: 1rem;
+      font-family: inherit;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--primary-color);
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      transition: opacity 0.2s, background-color 0.2s;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: var(--btn-text);
+      padding: 0.75rem 1.5rem;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.8;
+    }
+
+    /* Task List Styles */
+    .task-list {
+      list-style: none;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      margin-bottom: 0.5rem;
+    }
+
+    .task-content {
+      flex: 1;
+      margin-right: 1rem;
+      word-break: break-word;
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-edit {
+      background-color: var(--hover-bg);
+      color: var(--text-color);
+    }
+
+    .btn-edit:hover {
+      background-color: #e5e7eb;
+    }
+
+    .btn-delete {
+      background-color: transparent;
+      color: var(--danger-color);
+    }
+
+    .btn-delete:hover {
+      background-color: #fee2e2;
+    }
+
+    /* Inline Edit Input */
+    .edit-input {
+      width: 100%;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid var(--primary-color);
+      border-radius: 4px;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      color: #6b7280;
+      margin-top: 2rem;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Inbox</h1>
+
+    <form class="task-form" id="taskForm">
+      <input type="text" id="taskInput" placeholder="What's on your mind?" required autocomplete="off">
+      <button type="submit" class="btn-primary">Add</button>
+    </form>
+
+    <ul class="task-list" id="taskList">
+    </ul>
+
+    <div id="emptyState" class="empty-state" style="display: none;">
+      Your inbox is empty.
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:8001';
+    const taskForm = document.getElementById('taskForm');
+    const taskInput = document.getElementById('taskInput');
+    const taskList = document.getElementById('taskList');
+    const emptyState = document.getElementById('emptyState');
+
+    // Fetch and display tasks on load
+    document.addEventListener('DOMContentLoaded', fetchTasks);
+
+    // Handle new task submission
+    taskForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = taskInput.value.trim();
+      if (!text) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/inbox`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({text})
+        });
+
+        if (res.ok) {
+          taskInput.value = '';
+          fetchTasks(); // Refresh list
+        } else {
+          console.error('Failed to create task');
+        }
+      } catch (error) {
+        console.error('Error connecting to API:', error);
+        alert('Failed to connect to the API. Is it running?');
+      }
+    });
+
+    async function fetchTasks() {
+      try {
+        const res = await fetch(`${API_BASE}/inbox`);
+        if (!res.ok) throw new Error('Failed to fetch tasks');
+
+        const data = await res.json();
+        const tasks = data.inbox || [];
+
+        renderTasks(tasks);
+      } catch (error) {
+        console.error('Error fetching tasks:', error);
+        taskList.innerHTML = `<li style="color: red; text-align: center;">Error loading tasks. Check console.</li>`;
+      }
+    }
+
+    function renderTasks(tasks) {
+      taskList.innerHTML = '';
+
+      if (tasks.length === 0) {
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+
+      tasks.forEach(task => {
+        const li = document.createElement('li');
+        li.className = 'task-item';
+        li.dataset.id = task.id;
+
+        // Content wrapper
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'task-content';
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = task.text;
+        contentDiv.appendChild(textSpan);
+
+        // Actions wrapper
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'task-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-edit';
+        editBtn.textContent = 'Edit';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn-delete';
+        deleteBtn.textContent = 'Delete';
+
+        actionsDiv.appendChild(editBtn);
+        actionsDiv.appendChild(deleteBtn);
+
+        li.appendChild(contentDiv);
+        li.appendChild(actionsDiv);
+        taskList.appendChild(li);
+
+        // Delete Event
+        deleteBtn.addEventListener('click', () => deleteTask(task.id));
+
+        // Edit Event
+        editBtn.addEventListener('click', () => {
+          if (li.classList.contains('editing')) {
+            // Save changes
+            const input = contentDiv.querySelector('input');
+            updateTask(task.id, input.value);
+          } else {
+            // Switch to edit mode
+            li.classList.add('editing');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'edit-input';
+            input.value = task.text;
+
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(input);
+
+            editBtn.textContent = 'Save';
+            editBtn.style.backgroundColor = '#000';
+            editBtn.style.color = '#fff';
+
+            input.focus();
+
+            // Allow saving with Enter key
+            input.addEventListener('keypress', (e) => {
+              if (e.key === 'Enter') {
+                updateTask(task.id, input.value);
+              }
+            });
+          }
+        });
+      });
+    }
+
+    async function deleteTask(id) {
+      try {
+        const res = await fetch(`${API_BASE}/inbox/${id}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) fetchTasks();
+      } catch (error) {
+        console.error('Error deleting task:', error);
+      }
+    }
+
+    async function updateTask(id, newText) {
+      if (!newText.trim()) return;
+
+      try {
+        const res = await fetch(`${API_BASE}/inbox/${id}`, {
+          method: 'PATCH',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({text: newText.trim()})
+        });
+        if (res.ok) fetchTasks();
+      } catch (error) {
+        console.error('Error updating task:', error);
+      }
+    }
+  </script>
+
+</body>
+
+</html>

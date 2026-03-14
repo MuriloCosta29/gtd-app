@@ -16,7 +16,7 @@ GTD é um método de produtividade criado por David Allen baseado em capturar tu
 - Docker
 
 ## Status
-🚧 Em desenvolvimento
+✅ Terminado
 
 ## Rotas
 
@@ -37,7 +37,7 @@ GTD é um método de produtividade criado por David Allen baseado em capturar tu
 - [x] `PATCH /inbox/{id}` — atualizar status de uma tarefa
 
 ### Frontend
-- [ ] Interface
+- [x] Interface
 
 ### DevOps
-- [ ] Conteinerização com Docker
+- [x] Conteinerização com Docker
